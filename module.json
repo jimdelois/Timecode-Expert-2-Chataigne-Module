@@ -1,0 +1,223 @@
+{
+  "name": "Timecode Expert 2",
+  "type": "OSC",
+  "path": "Software",
+
+  "version": "0.1.0",
+  "description": "Chataigne Module to integrate with TXL20's Timecode Expert 2 LTC/MTC software",
+  "url": "https://github.com/jimdelois/Timecode-Expert-2-Chataigne-Module",
+  "downloadURL": "https://github.com/jimdelois/Timecode-Expert-2-Chataigne-Module/archive/master.zip",
+
+  "scripts": [
+    "timecodeExpertModule.js"
+  ],
+
+  "hasInput": false,
+  "hasOutput": true,
+
+  "defaults": {
+    "OSC Outputs": {
+      "OSC Output": {
+        "local" : true,
+        "remotePort" : 9001,
+        "listenToFeedback":false
+      }
+    }
+  },
+
+  "hideDefaultParameters": [
+    "useHierarchy",
+    "autoFeedback",
+    "colorSendMode",
+    "booleanSendMode",
+    "clearValues",
+    "oscOutputs/oscOutput/listenToFeedback",
+  ],
+  "parameters": {
+    "Generator Name": {
+      "type": "String",
+      "default": "Generator 1",
+      "description": "The name of the Generator in Timecode Expert 2 that this module will control"
+    },
+  },
+
+  "hideDefaultCommands": false,
+  "commands": {
+    "Play": {
+      "menu": "",
+      "callback": "commandPlay"
+    },
+    "Pause": {
+      "menu": "",
+      "callback": "commandPause"
+    },
+    "Stop": {
+      "menu": "",
+      "callback": "commandStop"
+    },
+
+    "Set Absolute": {
+      "menu": "Set Clock Time",
+      "callback": "commandSet",
+      "parameters": {
+        "Input Type": {
+          "type": "Enum",
+          "description": "The style of input to use to set the time",
+          "options": {
+            "Time": "time",
+            "Parameterized": "parameterized"
+          }
+        },
+        "Time": {
+          "type": "Float",
+          "ui": "time",
+          "min": 0.0,
+          "description": "Set the generator to this time",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "time",
+            "action": "show"
+          }
+        },
+        "Hours": {
+          "type": "Integer",
+          "description": "Set the generator's hour value to this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Minutes": {
+          "type": "Integer",
+          "description": "Set the generator's minute value to this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Seconds": {
+          "type": "Integer",
+          "description": "Set the generator's second value to this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Milliseconds": {
+          "type": "Integer",
+          "description": "Set the generator's millisecond value to this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        }
+      }
+    },
+
+    "Set Relative": {
+      "menu": "Set Clock Time",
+      "callback": "commandSetRelative",
+      "parameters": {
+        "Reference Time": {
+          "type": "Float",
+          "ui": "time",
+          "min": 0.0,
+          "description": "This is the base time that will have the relative adjustments made to it",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "time",
+            "action": "show"
+          }
+        },
+        "Input Type": {
+          "type": "Enum",
+          "description": "The style of input to use to set the adjustment",
+          "options": {
+            "Time": "time",
+            "Parameterized": "parameterized"
+          }
+        },
+        "Time Adjustment": {
+          "type": "Float",
+          "ui": "time",
+          "description": "Adjust the reference time's values by this time",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "time",
+            "action": "show"
+          }
+        },
+        "Hours": {
+          "type": "Integer",
+          "description": "Adjust the reference time's hour value by this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Minutes": {
+          "type": "Integer",
+          "description": "Adjust the reference time's minute value by this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Seconds": {
+          "type": "Integer",
+          "description": "Adjust the reference time's second value by this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+        "Milliseconds": {
+          "type": "Integer",
+          "description": "Adjust the reference time's millisecond value by this value",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "parameterized",
+            "action": "show"
+          }
+        },
+
+        "Calculated Time": {
+          "readOnly": true,
+          "type": "Float",
+          "ui": "time",
+          "min": 0.0,
+          "description": "This is the calculated time that will be sent to the generator",
+          "dependency": {
+            "source": "inputType",
+            "check": "equals",
+            "value": "time",
+            "action": "show"
+          }
+        },
+      }
+    },
+
+    "Toggle": {
+      "menu": "Wall Clock",
+      "callback": "commandWall"
+    },
+  }
+}
