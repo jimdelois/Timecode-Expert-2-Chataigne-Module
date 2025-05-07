@@ -37,6 +37,7 @@ function Client(generator) {
 
     this.sendTimecode = function(tc) {
         script.log("Sending \"SET\" to \"" + this.generator.name + "\" with value: " + tc.format());
+        local.values.lastSentTime.set(tc.toFloat());
         local.send(CFG.OSC.ADDRESS, this.generator.name, tc.h, tc.m, tc.s, tc.f);
     };
 
@@ -112,6 +113,15 @@ function Timecode(h, m, s, f) {
         .join(":")
         + "." + _zeroPad(proper.f, 3);
     };
+
+    this.toFloat = function() {
+        var sum = 0;
+        sum += parseFloat(this.h) * 60 * 60;
+        sum += parseFloat(this.m) * 60;
+        sum += parseFloat(this.s);
+        sum += parseFloat(this.f) / 1000;
+        return sum;
+    };
 }
 Timecode.ZERO = new Timecode(0, 0, 0, 0);
 
@@ -167,4 +177,6 @@ function commandSetRelative(referenceTime, inputType, time, h, m, s, f, calculat
 
     generator.set(tc.add(refTime));
 }
+
+function setupCallbackSetRelative(commandContainer) {}
 

@@ -41,7 +41,17 @@
     },
   },
 
-  "hideDefaultCommands": false,
+  "alwaysShowValues": true,
+  "values": {
+      "Last Sent Time": {
+        "type": "Float",
+        "ui": "time",
+        "default": 0,
+        "description": "The time value that was last sent to the generator. Note that this is simply the last time sent to the generator, not the current time of the generator."
+      },
+  },
+
+  "hideDefaultCommands": true,
   "commands": {
     "Play": {
       "menu": "",
@@ -126,18 +136,14 @@
     "Set Relative": {
       "menu": "Set Clock Time",
       "callback": "commandSetRelative",
+      "setupCallback": "setupCallbackSetRelative",
       "parameters": {
+
         "Reference Time": {
           "type": "Float",
           "ui": "time",
           "min": 0.0,
-          "description": "This is the base time that will have the relative adjustments made to it",
-          "dependency": {
-            "source": "inputType",
-            "check": "equals",
-            "value": "time",
-            "action": "show"
-          }
+          "description": "This is the base time that will have the relative adjustments made to it"
         },
         "Input Type": {
           "type": "Enum",
@@ -197,21 +203,7 @@
             "value": "parameterized",
             "action": "show"
           }
-        },
-
-        "Calculated Time": {
-          "readOnly": true,
-          "type": "Float",
-          "ui": "time",
-          "min": 0.0,
-          "description": "This is the calculated time that will be sent to the generator",
-          "dependency": {
-            "source": "inputType",
-            "check": "equals",
-            "value": "time",
-            "action": "show"
-          }
-        },
+        }
       }
     },
 
