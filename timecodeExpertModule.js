@@ -1,4 +1,12 @@
 /********************************************/
+/*                                          */
+/*     J U C E - C O M P A T I B L E        */
+/*        " J A V A S C R I P T "           */
+/*                                          */
+/********************************************/
+
+
+/********************************************/
 /*  Module Configuration                    */
 /********************************************/
 var CFG = {
@@ -13,8 +21,10 @@ var CFG = {
 /********************************************/
 /*  Helper Functions                        */
 /********************************************/
-function _carry(n, base) { return Math.floor(n / base); }
-function _self(n, base) { return (n < 0 ? base : 0) + (n % base); }
+var _baseReducer = {
+    carryPart: function(n, base) { return Math.floor(n / base); },
+    selfPart: function(n, base) { return (n < 0 ? base : 0) + (n % base); }
+};
 function _anyToInt(val) {
     val = parseInt(val);
     return val === NaN ? 0 : val;
@@ -32,6 +42,10 @@ function _zeroPad(n, l) {
 /********************************************/
 /*  Custom Domain Objects                   */
 /********************************************/
+
+/**
+ * An interface to wrap OSC and Logging side-effects
+ */
 function Client(generator) {
     this.generator = generator;
 
@@ -49,7 +63,9 @@ function Client(generator) {
 Client.CMDS = { PLAY: 'play', PAUSE: 'pause', STOP: 'stop', WALL: 'clock' };
 
 
-
+/**
+ * Represents an instance of a Generator in Timecode Expert
+ */
 function Generator(name) {
     this.name = "" + name;
     this.client = new Client(this);
@@ -63,9 +79,13 @@ function Generator(name) {
 
 
 
-// We refer to the fourth digit as "Frames" ("f") in this Module, but
-// note that TCE actually treats this value as milliseconds on the
-// Generator's side of things, so our math will reflect that herein.
+/**
+ * Represents a Timecode object and encapsulates some basic operations
+ *
+ * NOTE: We refer to the fourth digit as "Frames" ("f") in this Module, but
+ * TCE actually treats this value as milliseconds on the Generator's
+ * side of things, so our math will reflect that herein.
+ */
 function Timecode(h, m, s, f) {
     this.h = _anyToInt(h);
     this.m = _anyToInt(m);
@@ -83,14 +103,14 @@ function Timecode(h, m, s, f) {
         var nextS = this.s + _anyToInt(tc.s);
         var nextF = this.f + _anyToInt(tc.f);
 
-        nextS = nextS + _carry(nextF, CFG.BASE.FRAMES);
-        nextF = _self(nextF, CFG.BASE.FRAMES);
+        nextS = nextS + _baseReducer.carryPart(nextF, CFG.BASE.FRAMES);
+        nextF = _baseReducer.selfPart(nextF, CFG.BASE.FRAMES);
 
-        nextM = nextM + _carry(nextS, CFG.BASE.TIME);
-        nextS = _self(nextS, CFG.BASE.TIME);
+        nextM = nextM + _baseReducer.carryPart(nextS, CFG.BASE.TIME);
+        nextS = _baseReducer.selfPart(nextS, CFG.BASE.TIME);
 
-        nextH = nextH + _carry(nextM, CFG.BASE.TIME);
-        nextM = _self(nextM, CFG.BASE.TIME);
+        nextH = nextH + _baseReducer.carryPart(nextM, CFG.BASE.TIME);
+        nextM = _baseReducer.selfPart(nextM, CFG.BASE.TIME);
 
         if (nextH >= CFG.BOUNDS.HRS.UPPER) return new Timecode(CFG.BOUNDS.HRS.UPPER-1, CFG.BASE.TIME-1, CFG.BASE.TIME-1, CFG.BASE.FRAMES-1);
         if (nextH < CFG.BOUNDS.HRS.LOWER) return Timecode.ZERO;
@@ -98,10 +118,17 @@ function Timecode(h, m, s, f) {
         return new Timecode(nextH, nextM, nextS, nextF);
     };
 
+    /**
+     * Ensures that any "Relative" Timecode is converted into a proper one.
+     *  E.g., "01:-01:-70.000" => "00:57:50.000"
+     */
     this.normalize = function() {
         return this.add(Timecode.ZERO);
     };
 
+    /**
+     * Returns a string representation of this object
+     */
     this.format = function() {
         var proper = this.normalize();
 
@@ -114,6 +141,9 @@ function Timecode(h, m, s, f) {
         + "." + _zeroPad(proper.f, 3);
     };
 
+    /**
+     * Converts a Float (in seconds) into a Timecode object
+     */
     this.toFloat = function() {
         var sum = 0;
         sum += parseFloat(this.h) * 60 * 60;
@@ -123,8 +153,14 @@ function Timecode(h, m, s, f) {
         return sum;
     };
 }
+/**
+ * The constant for "00:00:00.000"
+ */
 Timecode.ZERO = new Timecode(0, 0, 0, 0);
 
+/**
+ * Converts a Float (in seconds) into a Timecode object
+ */
 Timecode.fromFloat = function(fl) {
     var intPart = parseInt(fl);
     return new Timecode(0, 0, intPart, Math.round((fl - intPart) * 1000));
@@ -132,7 +168,7 @@ Timecode.fromFloat = function(fl) {
 
 
 /********************************************/
-/*  Script Globals                          */
+/*  Additional Script Globals               */
 /********************************************/
 var generator = new Generator("Generator 1");
 
@@ -167,16 +203,16 @@ function commandWall() { generator.toggleWallClock(); }
 
 function commandSet(inputType, time, h, m, s, f) {
     var tc = (inputType === "time") ? Timecode.fromFloat(time) : new Timecode(h, m, s, f);
+
     generator.set(tc.normalize());
 }
 
-function commandSetRelative(referenceTime, inputType, time, h, m, s, f, calculatedTime) {
-    // TODO: Can we dynamically update "calculatedTime" ??
-    var refTime = Timecode.fromFloat(referenceTime);
+function commandSetRelative(referenceTime, inputType, time, h, m, s, f) {
     var tc = (inputType === "time") ? Timecode.fromFloat(time) : new Timecode(h, m, s, f);
+    var refTime = Timecode.fromFloat(referenceTime);
 
     generator.set(tc.add(refTime));
 }
 
-function setupCallbackSetRelative(commandContainer) {}
+function setupCallbackSetRelative(commandContainer) {} // Reserved for future use
 
