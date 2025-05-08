@@ -6,7 +6,7 @@
   "version": "0.1.0",
   "description": "Chataigne Module to integrate with TXL20's Timecode Expert 2 LTC/MTC software",
   "url": "https://github.com/jimdelois/Timecode-Expert-2-Chataigne-Module",
-  "downloadURL": "https://github.com/jimdelois/Timecode-Expert-2-Chataigne-Module/archive/main.zip",
+  "downloadURL": "https://github.com/jimdelois/Timecode-Expert-2-Chataigne-Module/releases/download/v0.1.0/Timecode-Expert-2-Chataigne-Module-latest.zip",
 
   "scripts": [
     "timecodeExpertModule.js"
